@@ -280,3 +280,56 @@ button:hover {
 .is-typing .pulse-bar {
     animation-play-state: running;
 }
+#sidebar {
+    position: absolute;
+    left: 20px;
+    top: 100px;
+    width: 200px;
+    background: rgba(0, 10, 20, 0.7);
+    border: 1px solid #00f2ff;
+    border-radius: 10px;
+    padding: 15px;
+    z-index: 100;
+    backdrop-filter: blur(5px);
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+#new-chat-btn {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    border: 1px solid #00f2ff;
+    color: #00f2ff;
+    font-family: 'Courier New', Courier, monospace;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-bottom: 15px;
+}
+
+#new-chat-btn:hover {
+    background: rgba(0, 242, 255, 0.2);
+    box-shadow: 0 0 10px #00f2ff;
+}
+
+.session-item {
+    padding: 8px;
+    margin-top: 5px;
+    border-bottom: 1px solid rgba(0, 242, 255, 0.2);
+    font-size: 12px;
+    color: #aaa;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.session-item:hover {
+    color: #00f2ff;
+}
+
+.active-session {
+    border-left: 3px solid #00f2ff;
+    color: #00f2ff;
+    padding-left: 10px;
+}

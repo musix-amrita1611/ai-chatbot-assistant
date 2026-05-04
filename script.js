@@ -1,127 +1,115 @@
-// 1. Select the elements
-const statusText = document.getElementById("status-text");
-const statusContainer = document.getElementById("ai-status");
-const sendBtn = document.getElementById("send-btn");
-const userInput = document.getElementById("user-input");
-const chatBox = document.getElementById("chat-box");
+// --- MISSION CONFIGURATION ---
+let currentSessionId = "Mission_" + Date.now();
+let savedSessions = [currentSessionId];
 
-// 2. UI Control Helpers
-function lockUI() {
-    sendBtn.disabled = true;
-    sendBtn.style.opacity = "0.5";
-    sendBtn.style.cursor = "not-allowed";
-    userInput.disabled = true; // Also lock input during transmission
-}
+// DOM Elements
+const chatBox = document.getElementById('chat-box');
+const sessionList = document.getElementById('session-list');
+const newChatBtn = document.getElementById('new-chat-btn');
+const userInput = document.getElementById('user-input');
+const sendBtn = document.getElementById('send-btn');
+const statusText = document.getElementById('status-text');
+const aiStatusContainer = document.getElementById('ai-status');
 
-function unlockUI() {
-    sendBtn.disabled = false;
-    sendBtn.style.opacity = "1";
-    sendBtn.style.cursor = "pointer";
-    userInput.disabled = false;
-    userInput.focus();
-}
+// --- NEW CHAT (NEW MISSION) ---
+newChatBtn.addEventListener('click', () => {
+    // Generate a fresh unique ID
+    currentSessionId = "Mission_" + Date.now();
+    savedSessions.unshift(currentSessionId); // Add new mission to the top of the list
+    
+    // Clear Visuals with a system message
+    chatBox.innerHTML = `<div class="system-msg">--- NEW FREQUENCY ESTABLISHED: ${currentSessionId} ---</div>`;
+    
+    updateSidebar();
+});
 
-function resetStatus() {
-    if (statusText) statusText.innerText = "SYSTEM READY";
-    if (statusContainer) statusContainer.classList.remove("is-typing");
-}
-
-// 3. The Main Chat Logic
-async function handleChat() {
+// --- TRANSMISSION LOGIC ---
+async function transmitMessage() {
     const message = userInput.value.trim();
     if (!message) return;
 
-    lockUI();
-    appendMessage(message, "user-message");
-    userInput.value = "";
-    
-    if (statusText) statusText.innerText = "TRANSMITTING...";
-    if (statusContainer) statusContainer.classList.add("is-typing");
+    // 1. Display User Command
+    chatBox.innerHTML += `<div class="user-message"><b>COMMAND:</b> ${message}</div>`;
+    userInput.value = '';
+    scrollToBottom();
+
+    // 2. Trigger AI "Typing" Animation
+    statusText.innerText = "TRANSMITTING...";
+    aiStatusContainer.classList.add('is-typing');
 
     try {
-        const response = await fetch("http://127.0.0.1:3000/chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: message })
+        const response = await fetch('http://localhost:3000/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                message: message, 
+                sessionId: currentSessionId 
+            })
         });
 
         const data = await response.json();
-
-        if (response.ok) {
-            if (statusText) statusText.innerText = "RECEIVING DATA...";
-            appendMessage(data.reply, "bot-message", true);
-        } else {
-            // SPACE THEMED ERROR HANDLING
-            let errorMsg = "Unknown Satellite Interference.";
-            
-            if (response.status === 429) {
-                errorMsg = "📡 Satellite interference detected. Signal will be restored in 60 seconds. Please stand by.";
-            } else if (data.error) {
-                errorMsg = data.error;
-            }
-
-            appendMessage("⚠️ " + errorMsg, "bot-message");
-            resetStatus();
-            unlockUI();
-        }
+        
+        // 3. Display AI Response
+        chatBox.innerHTML += `<div class="bot-message"><b>SATELLITE:</b> ${data.reply}</div>`;
 
     } catch (error) {
-        console.error("Connection Error:", error);
-        appendMessage("📡 Transmission Lost. Ground control (Node server) is offline.", "bot-message");
-        resetStatus();
-        unlockUI();
+        chatBox.innerHTML += `<div class="bot-message" style="color: #ff4444;"><b>ERROR:</b> Satellite Link Lost. Check Server Status.</div>`;
+    } finally {
+        // 4. Reset Status
+        statusText.innerText = "SYSTEM READY";
+        aiStatusContainer.classList.remove('is-typing');
+        scrollToBottom();
     }
 }
 
-// 4. Message & Typewriter Logic
-function appendMessage(text, className, isAI = false) {
-    const msgDiv = document.createElement("div");
-    msgDiv.className = className;
-    msgDiv.style.whiteSpace = "pre-wrap"; 
-    chatBox.appendChild(msgDiv);
+// --- SIDEBAR & HISTORY LOGIC ---
+function updateSidebar() {
+    sessionList.innerHTML = ''; // Clear current sidebar
+    
+    savedSessions.forEach(id => {
+        const div = document.createElement('div');
+        // Apply active class if this is the currently selected mission
+        div.className = `session-item ${id === currentSessionId ? 'active-session' : ''}`;
+        div.innerText = id;
+        
+        div.onclick = () => {
+            currentSessionId = id;
+            chatBox.innerHTML = `<div class="system-msg">--- SWITCHED TO MISSION: ${id} ---</div>`;
+            updateSidebar();
+        };
+        
+        sessionList.appendChild(div);
+    });
+}
 
-    if (isAI) {
-        typeWriter(text, msgDiv);
-    } else {
-        msgDiv.innerText = text;
-    }
+// --- UTILITY FUNCTIONS ---
+function scrollToBottom() {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-function typeWriter(text, element) {
-    let i = 0;
-    element.innerHTML = ""; 
-    
-    function type() {
-        if (i < text.length) {
-            element.innerHTML += text.charAt(i);
-            i++;
-            chatBox.scrollTop = chatBox.scrollHeight;
-            setTimeout(type, 20);
-        } else {
-            resetStatus();
-            unlockUI(); // Re-enable only after typing finishes
-        }
-    }
-    type();
-}
-
-// 5. Event Listeners
-sendBtn.addEventListener("click", handleChat);
-userInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter" && !sendBtn.disabled) handleChat();
-});
-
-// 6. Clock Logic
+// Digital Clock Updater
 function updateClock() {
     const now = new Date();
-    let hours = String(now.getHours()).padStart(2, '0');
-    let minutes = String(now.getMinutes()).padStart(2, '0');
-    let seconds = String(now.getSeconds()).padStart(2, '0');
-    const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+    const timeStr = now.toLocaleTimeString('en-GB', { hour12: false });
+    const dateStr = now.toLocaleDateString('en-GB', { 
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+    });
     
-    document.getElementById('clock-time').textContent = `${hours}:${minutes}:${seconds}`;
-    document.getElementById('clock-date').textContent = now.toLocaleDateString('en-US', options);
+    document.getElementById('clock-time').innerText = timeStr;
+    document.getElementById('clock-date').innerText = dateStr.toUpperCase();
 }
+
+// --- INITIALIZATION ---
+// Event Listeners
+sendBtn.addEventListener('click', transmitMessage);
+userInput.addEventListener('keypress', (e) => { 
+    if (e.key === 'Enter') transmitMessage(); 
+});
+
+// Start background processes
+updateSidebar();
 setInterval(updateClock, 1000);
 updateClock();
+
+// Initial System Message
+chatBox.innerHTML = `<div class="system-msg">--- TERMINAL ACTIVE: READY FOR TRANSMISSION ---</div>`;

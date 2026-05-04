@@ -7,50 +7,66 @@
 </head>
 
 <body>
-
+    <!-- Main UI Container -->
     <div class="space-environment">
-    <div class="starfield-slow"></div>
-    <div class="starfield-fast"></div>
-    <div class="milkyway"></div>
-    <div class="nebula"></div>
-
-    <div class="solar-system">
-        <div class="sun"></div>
         
-        <div class="orbit mercury-orbit"><div class="planet mercury"></div></div>
-        <div class="orbit venus-orbit"><div class="planet venus"></div></div>
-        <div class="orbit earth-orbit">
-            <div class="planet earth">
-                <div class="moon-orbit"><div class="moon"></div></div>
+        <!-- Sidebar: Moved outside solar-system to avoid overlap -->
+        <div id="sidebar">
+            <button id="new-chat-btn">✚ NEW MISSION</button>
+            <div id="session-list">
+                <!-- Previous chats will appear here -->
             </div>
         </div>
-        <div class="orbit mars-orbit"><div class="planet mars"></div></div>
-        <div class="orbit jupiter-orbit"><div class="planet jupiter"></div></div>
-        <div class="orbit saturn-orbit">
-            <div class="planet saturn"><div class="ring"></div></div>
-        </div>
-        <div class="orbit uranus-orbit"><div class="planet uranus"></div></div>
-        <div class="orbit neptune-orbit"><div class="planet neptune"></div></div>
-    </div>
-    <div id="ai-status">
-    <span id="status-text">SYSTEM READY</span>
-    <div class="pulse-container">
-        <div class="pulse-bar"></div>
-        <div class="pulse-bar"></div>
-        <div class="pulse-bar"></div>
-    </div>
-</div>
 
-    <div id="chat-box"></div>
-    <div class="transmit-area">
-        <input type="text" id="user-input" placeholder="Type your transmission..." autocomplete="off">
-        <button id="send-btn">TRANSMIT</button>
-    </div>
-</div>
-<div class="digital-clock">
-    <div id="clock-time">00:00:00</div>
-    <div id="clock-date">LOADING DATE...</div>
-</div>
+        <!-- Space Backgrounds -->
+        <div class="starfield-slow"></div>
+        <div class="starfield-fast"></div>
+        <div class="milkyway"></div>
+        <div class="nebula"></div>
+
+        <!-- Solar System Graphic -->
+        <div class="solar-system">
+            <div class="sun"></div>
+            <div class="orbit mercury-orbit"><div class="planet mercury"></div></div>
+            <div class="orbit venus-orbit"><div class="planet venus"></div></div>
+            <div class="orbit earth-orbit">
+                <div class="planet earth">
+                    <div class="moon-orbit"><div class="moon"></div></div>
+                </div>
+            </div>
+            <div class="orbit mars-orbit"><div class="planet mars"></div></div>
+            <div class="orbit jupiter-orbit"><div class="planet jupiter"></div></div>
+            <div class="orbit saturn-orbit">
+                <div class="planet saturn"><div class="ring"></div></div>
+            </div>
+            <div class="orbit uranus-orbit"><div class="planet uranus"></div></div>
+            <div class="orbit neptune-orbit"><div class="planet neptune"></div></div>
+        </div>
+
+        <!-- System Status Info -->
+        <div id="ai-status">
+            <span id="status-text">SYSTEM READY</span>
+            <div class="pulse-container">
+                <div class="pulse-bar"></div>
+                <div class="pulse-bar"></div>
+                <div class="pulse-bar"></div>
+            </div>
+        </div>
+
+        <!-- Main Interaction Area (Only ONE instance) -->
+        <div id="chat-box"></div>
+        <div class="transmit-area">
+            <input type="text" id="user-input" placeholder="Type your transmission..." autocomplete="off">
+            <button id="send-btn">TRANSMIT</button>
+        </div>
+
+        <!-- Clock Display -->
+        <div class="digital-clock">
+            <div id="clock-time">00:00:00</div>
+            <div id="clock-date">LOADING DATE...</div>
+        </div>
+        
+    </div> <!-- Close space-environment -->
 
     <script src="script.js"></script>
 </body>

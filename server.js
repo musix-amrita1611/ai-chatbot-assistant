@@ -19,7 +19,7 @@ app.post('/chat', async (req, res) => {
         const { message } = req.body;
         
         // Using 'gemini-1.5-flash' - this is the most widely supported current model
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
 
         const prompt = `System Instruction: You are a helpful assistant. Use bullet points. START EVERY POINT ON A NEW LINE. Use TWO line breaks between every point. \n\n User Message: ${message}`;
 
