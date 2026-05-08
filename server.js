@@ -7,24 +7,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Verify API Key exists on startup
 if (!process.env.GEMINI_API_KEY) {
     console.error("❌ ERROR: GEMINI_API_KEY is missing from .env file!");
 }
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-/**
- * --- SESSION STORAGE ---
- * This object will store the chat history for each unique Mission ID.
- * Format: { "Mission_123": [{ role: "user", parts: [...] }, { role: "model", parts: [...] }] }
- */
 const sessions = {};
 
-// Initialize Model Configuration
+// Use the 1.5-flash or your preferred model
 const model = genAI.getGenerativeModel({ 
-    model: "gemini-3.1-flash-lite-preview", // Stable version, change to your preview model if preferred
-    systemInstruction: "You are a helpful assistant. Use bullet points. START EVERY POINT ON A NEW LINE. Use TWO line breaks between every point."
+    model: "gemini-1.5-flash", 
+    systemInstruction: "You are a space-themed assistant named SATELLITE. Be concise. Use bullet points for long answers."
 });
 
 app.post('/chat', async (req, res) => {
@@ -35,49 +28,50 @@ app.post('/chat', async (req, res) => {
             return res.status(400).json({ error: "Missing message or sessionId" });
         }
 
-        // 1. If this is a new Mission ID, initialize an empty history array
         if (!sessions[sessionId]) {
             sessions[sessionId] = [];
         }
 
-        // 2. Start a chat session using the history for this specific Mission
+        // 1. Start Chat with History
         const chat = model.startChat({
             history: sessions[sessionId],
-            generationConfig: {
-                maxOutputTokens: 1000,
-            },
+            generationConfig: { maxOutputTokens: 1000 },
         });
 
-        // 3. Send the message through the chat session
+        // 2. Get AI Response
         const result = await chat.sendMessage(message);
         const text = result.response.text();
 
-        // 4. Record the interaction in our local session storage to maintain "memory"
-        sessions[sessionId].push({
-            role: "user",
-            parts: [{ text: message }],
-        });
-        sessions[sessionId].push({
-            role: "model",
-            parts: [{ text: text }],
-        });
+        // 3. Update Local Memory
+        sessions[sessionId].push({ role: "user", parts: [{ text: message }] });
+        sessions[sessionId].push({ role: "model", parts: [{ text: text }] });
 
-        res.json({ reply: text });
-
-    } catch (error) {
-        console.error("--- DETAILED SERVER ERROR ---");
-        console.error(error.message);
-        
-        // Handle Rate Limiting (Quota)
-        if (error.status === 429 || error.message?.includes('429')) {
-            return res.status(429).json({ error: "Quota exhausted. Please wait 60 seconds." });
+        /**
+         * --- HACKATHON UNIQUE FEATURE: AUTO-SUMMARIZATION ---
+         * We ask the AI to summarize the mission in 3 words for the sidebar title.
+         * We only do this every few messages to save on quota.
+         */
+        let missionTopic = "Active Mission";
+        if (sessions[sessionId].length >= 2) {
+            const summaryResult = await model.generateContent(
+                `Summarize this conversation in exactly 3 words for a mission title. Conversation: ${message}`
+            );
+            missionTopic = summaryResult.response.text().replace(/[".]/g, "").trim();
         }
 
-        res.status(500).json({ error: "Transmission failed. Check satellite link." });
+        // 4. Return the response + the new metadata
+        res.json({ 
+            reply: text, 
+            topic: missionTopic, // For the sidebar title
+            lastTopic: message.substring(0, 30) + "..." // For the "Welcome Back" greeting
+        });
+
+    } catch (error) {
+        console.error("--- SERVER ERROR ---", error.message);
+        res.status(500).json({ error: "Transmission failed." });
     }
 });
 
-// Optional: Route to clear a mission's memory if needed
 app.delete('/chat/:sessionId', (req, res) => {
     const { sessionId } = req.params;
     delete sessions[sessionId];
@@ -86,6 +80,5 @@ app.delete('/chat/:sessionId', (req, res) => {
 
 const PORT = 3000;
 app.listen(PORT, () => {
-    console.log(`✅ Server is running on http://localhost:${PORT}`);
-    console.log(`🚀 Ready for space transmissions with memory enabled!`);
+    console.log(`✅ Satellite Server online at http://localhost:${PORT}`);
 });

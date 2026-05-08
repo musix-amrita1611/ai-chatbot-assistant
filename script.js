@@ -1,6 +1,7 @@
 // --- MISSION CONFIGURATION ---
-let currentSessionId = "Mission_" + Date.now();
-let savedSessions = [currentSessionId];
+// Load existing missions from LocalStorage or start with an empty array
+let missions = JSON.parse(localStorage.getItem('satellite_data')) || [];
+let currentSessionId = missions.length > 0 ? missions[0].id : null;
 
 // DOM Elements
 const chatBox = document.getElementById('chat-box');
@@ -11,17 +12,41 @@ const sendBtn = document.getElementById('send-btn');
 const statusText = document.getElementById('status-text');
 const aiStatusContainer = document.getElementById('ai-status');
 
-// --- NEW CHAT (NEW MISSION) ---
-newChatBtn.addEventListener('click', () => {
-    // Generate a fresh unique ID
-    currentSessionId = "Mission_" + Date.now();
-    savedSessions.unshift(currentSessionId); // Add new mission to the top of the list
-    
-    // Clear Visuals with a system message
-    chatBox.innerHTML = `<div class="system-msg">--- NEW FREQUENCY ESTABLISHED: ${currentSessionId} ---</div>`;
-    
+// --- INITIALIZATION ---
+window.onload = () => {
+    if (missions.length > 0) {
+        // Resume the most recent mission
+        const lastMission = missions[0];
+        currentSessionId = lastMission.id;
+        chatBox.innerHTML = lastMission.history;
+        
+        // The "Unique Twist" Greeting
+        const welcomeBackMsg = `<div class="system-msg">--- CONNECTION RESTORED: COMMANDER ---<br>Resuming ${lastMission.title}. Last contact: ${lastMission.lastTopic}</div>`;
+        chatBox.innerHTML += welcomeBackMsg;
+    } else {
+        createNewMission();
+    }
     updateSidebar();
-});
+    setInterval(updateClock, 1000);
+    updateClock();
+};
+
+// --- MISSION MANAGEMENT ---
+function createNewMission() {
+    currentSessionId = "Mission_" + Date.now();
+    const newMission = {
+        id: currentSessionId,
+        title: "New Transmission",
+        lastTopic: "None",
+        history: `<div class="system-msg">--- TERMINAL ACTIVE: READY FOR TRANSMISSION ---</div>`
+    };
+    missions.unshift(newMission);
+    saveToDisk();
+    chatBox.innerHTML = newMission.history;
+    updateSidebar();
+}
+
+newChatBtn.addEventListener('click', createNewMission);
 
 // --- TRANSMISSION LOGIC ---
 async function transmitMessage() {
@@ -33,7 +58,7 @@ async function transmitMessage() {
     userInput.value = '';
     scrollToBottom();
 
-    // 2. Trigger AI "Typing" Animation
+    // 2. UI Feedback
     statusText.innerText = "TRANSMITTING...";
     aiStatusContainer.classList.add('is-typing');
 
@@ -52,64 +77,68 @@ async function transmitMessage() {
         // 3. Display AI Response
         chatBox.innerHTML += `<div class="bot-message"><b>SATELLITE:</b> ${data.reply}</div>`;
 
+        // 4. PERSISTENCE LOGIC: Save to the correct mission object
+        const activeMission = missions.find(m => m.id === currentSessionId);
+        if (activeMission) {
+            activeMission.history = chatBox.innerHTML;
+            // If server sends a topic/summary, update it here
+            if(data.topic) activeMission.title = data.topic; 
+            if(data.lastTopic) activeMission.lastTopic = data.lastTopic;
+        }
+        saveToDisk();
+        updateSidebar();
+
     } catch (error) {
         chatBox.innerHTML += `<div class="bot-message" style="color: #ff4444;"><b>ERROR:</b> Satellite Link Lost. Check Server Status.</div>`;
     } finally {
-        // 4. Reset Status
         statusText.innerText = "SYSTEM READY";
         aiStatusContainer.classList.remove('is-typing');
         scrollToBottom();
     }
 }
 
-// --- SIDEBAR & HISTORY LOGIC ---
+// --- SIDEBAR & DISK LOGIC ---
 function updateSidebar() {
-    sessionList.innerHTML = ''; // Clear current sidebar
-    
-    savedSessions.forEach(id => {
+    sessionList.innerHTML = ''; 
+    missions.forEach(m => {
         const div = document.createElement('div');
-        // Apply active class if this is the currently selected mission
-        div.className = `session-item ${id === currentSessionId ? 'active-session' : ''}`;
-        div.innerText = id;
+        div.className = `session-item ${m.id === currentSessionId ? 'active-session' : ''}`;
+        
+        // Space-themed UI for sidebar items
+        div.innerHTML = `
+            <div style="font-weight: bold;">${m.title}</div>
+            <div style="font-size: 10px; opacity: 0.5;">ID: ${m.id}</div>
+        `;
         
         div.onclick = () => {
-            currentSessionId = id;
-            chatBox.innerHTML = `<div class="system-msg">--- SWITCHED TO MISSION: ${id} ---</div>`;
+            // Save current before switching
+            currentSessionId = m.id;
+            chatBox.innerHTML = m.history;
             updateSidebar();
+            scrollToBottom();
         };
-        
         sessionList.appendChild(div);
     });
 }
 
-// --- UTILITY FUNCTIONS ---
+function saveToDisk() {
+    // Keep only last 10 missions to avoid storage limits
+    if (missions.length > 10) missions = missions.slice(0, 10);
+    localStorage.setItem('satellite_data', JSON.stringify(missions));
+}
+
+// --- UTILITIES ---
 function scrollToBottom() {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Digital Clock Updater
 function updateClock() {
     const now = new Date();
-    const timeStr = now.toLocaleTimeString('en-GB', { hour12: false });
-    const dateStr = now.toLocaleDateString('en-GB', { 
+    document.getElementById('clock-time').innerText = now.toLocaleTimeString('en-GB', { hour12: false });
+    document.getElementById('clock-date').innerText = now.toLocaleDateString('en-GB', { 
         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-    });
-    
-    document.getElementById('clock-time').innerText = timeStr;
-    document.getElementById('clock-date').innerText = dateStr.toUpperCase();
+    }).toUpperCase();
 }
 
-// --- INITIALIZATION ---
-// Event Listeners
 sendBtn.addEventListener('click', transmitMessage);
-userInput.addEventListener('keypress', (e) => { 
-    if (e.key === 'Enter') transmitMessage(); 
-});
-
-// Start background processes
-updateSidebar();
-setInterval(updateClock, 1000);
-updateClock();
-
-// Initial System Message
-chatBox.innerHTML = `<div class="system-msg">--- TERMINAL ACTIVE: READY FOR TRANSMISSION ---</div>`;
+userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') transmitMessage(); });

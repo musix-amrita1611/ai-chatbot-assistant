@@ -158,6 +158,10 @@ body, html {
     display: block;
     line-height: 1.8;      /* Adds nice vertical space between points */
     margin-bottom: 15px;
+    .bot-message {
+    white-space: pre-wrap; /* Preserves the line breaks from Gemini */
+    overflow: hidden;
+}
 }
 
 .user-message { 
