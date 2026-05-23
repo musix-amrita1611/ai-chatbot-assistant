@@ -1,339 +1,329 @@
-/* 1. Base Setup */
-* { margin: 0; padding: 0; box-sizing: border-box; }
+/* ═══════════════════════════════════════════════
+   RAG AI Chatbot — Space Theme (Original + Upgrades)
+   ═══════════════════════════════════════════════ */
 
-body, html {
-    height: 100vh; width: 100vw;
-    background: #010206; /* Pitch black space */
-    overflow: hidden;
-    font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;900&family=Share+Tech+Mono&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --space-black: #050a15;
+  --space-dark: #0a1628;
+  --nebula-blue: #0d2137;
+  --glow-cyan: #00d4ff;
+  --glow-purple: #7b2dff;
+  --glow-green: #00ff88;
+  --star-white: #e8f4ff;
+  --text-dim: #7a9bb5;
+  --panel-bg: rgba(5, 15, 35, 0.85);
+  --border-glow: rgba(0, 212, 255, 0.3);
+  --font-hud: 'Orbitron', monospace;
+  --font-mono: 'Share Tech Mono', monospace;
 }
 
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  background: var(--space-black);
+  font-family: var(--font-mono);
+  color: var(--star-white);
+}
+
+/* ─── SPACE ENVIRONMENT ─── */
 .space-environment {
-    position: relative; width: 100%; height: 100%;
-    display: flex; flex-direction: column; align-items: center;
+  position: relative; width: 100vw; height: 100vh;
+  overflow: hidden;
 }
 
-/* 2. Deep Space Background Layers (Parallax) */
-
-/* Slow Stars (Background) */
-.starfield-slow {
-    position: absolute; width: 200%; height: 200%;
-    background: transparent url('https://www.transparenttextures.com/patterns/stardust.png') repeat;
-    background-size: 200px;
-    opacity: 0.4;
-    z-index: 1;
-    animation: panStars 150s linear infinite;
+/* Starfields */
+.starfield-slow, .starfield-fast {
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, white, transparent),
+    radial-gradient(1px 1px at 80% 10%, white, transparent),
+    radial-gradient(1px 1px at 50% 60%, white, transparent),
+    radial-gradient(1px 1px at 10% 80%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1.5px 1.5px at 70% 50%, rgba(200,220,255,0.8), transparent),
+    radial-gradient(1px 1px at 35% 15%, white, transparent),
+    radial-gradient(1px 1px at 90% 70%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 45% 88%, white, transparent),
+    radial-gradient(1px 1px at 60% 25%, rgba(255,255,255,0.7), transparent),
+    radial-gradient(2px 2px at 15% 45%, rgba(150,200,255,0.9), transparent);
+  background-size: 300px 300px;
+  animation: drift 60s linear infinite;
 }
-
-/* Fast Stars (Foreground) */
 .starfield-fast {
-    position: absolute; width: 200%; height: 200%;
-    background: transparent url('https://www.transparenttextures.com/patterns/stardust.png') repeat;
-    background-size: 400px;
-    opacity: 0.6;
-    z-index: 2;
-    animation: panStars 90s linear infinite;
+  background-size: 150px 150px;
+  animation-duration: 25s;
+  opacity: 0.5;
 }
+@keyframes drift { from { background-position: 0 0; } to { background-position: 600px 600px; } }
 
-/* The Milky Way Galaxy */
 .milkyway {
-    position: absolute; top: 0; left: -50%; width: 200%; height: 100%;
-    background: url('https://upload.wikimedia.org/wikipedia/commons/4/43/The_Milky_Way_arch.jpg') no-repeat center center;
-    background-size: cover;
-    opacity: 0.15; /* Subtly visible */
-    filter: blur(10px) saturate(0.5);
-    z-index: 3;
-    animation: galaxyDrift 200s linear infinite;
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 120% 40% at 50% 50%,
+    rgba(30, 60, 120, 0.15) 0%, transparent 70%);
 }
-
-/* Atmospheric Nebula */
 .nebula {
-    position: absolute; width: 100%; height: 100%;
-    background: 
-        radial-gradient(circle at 20% 30%, rgba(100, 0, 255, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 80% 70%, rgba(0, 200, 255, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 50% 50%, rgba(255, 0, 150, 0.05) 0%, transparent 60%);
-    filter: blur(50px);
-    z-index: 4;
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 80%, rgba(123,45,255,0.07), transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(0,212,255,0.05), transparent 50%);
 }
 
-/* 3. The Solar System (Animated) */
+/* ─── SOLAR SYSTEM ─── */
 .solar-system {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 5; /* Behind the chat but in front of stars */
+  position: absolute; top: 50%; left: 50%;
+  width: 600px; height: 600px;
+  transform: translate(-50%, -50%);
+  pointer-events: none; z-index: 0;
+  opacity: 0.35;
 }
-
-/* Center Sun */
 .sun {
-    position: absolute; top: 50%; left: 50%;
-    width: 120px; height: 120px;
-    background: radial-gradient(circle, #ffea00, #ff8800, #ff4400);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    box-shadow: 0 0 100px 20px #ff8800, 0 0 200px 50px rgba(255, 68, 0, 0.3);
+  position: absolute; top: 50%; left: 50%;
+  width: 32px; height: 32px;
+  background: radial-gradient(circle, #fff6a0, #ffcc00 50%, #ff8800);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 20px #ffcc00, 0 0 50px rgba(255, 200, 0, 0.4);
 }
-
-/* Orbit Path Setup */
 .orbit {
-    position: absolute; top: 50%; left: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.03); /* Barely visible paths */
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    animation: rotateOrbit linear infinite;
+  position: absolute; top: 50%; left: 50%;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 50%; transform: translate(-50%,-50%);
+  animation: orbit-rotate linear infinite;
 }
-
 .planet {
-    position: absolute; top: 0; left: 50%;
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    box-shadow: inset -5px -5px 10px rgba(0,0,0,0.5); /* Shadow from Sun */
+  position: absolute; top: 0; left: 50%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
 }
+.mercury-orbit { width:80px; height:80px; animation-duration:4s; }
+.mercury { width:5px; height:5px; background:#b5b5b5; }
+.venus-orbit { width:120px; height:120px; animation-duration:10s; }
+.venus { width:7px; height:7px; background:#e8c26e; }
+.earth-orbit { width:170px; height:170px; animation-duration:16s; }
+.earth { width:8px; height:8px; background:#4a90d9; }
+.moon-orbit { position:absolute; width:22px; height:22px; animation:orbit-rotate 2s linear infinite; top:-5px; left:-7px; border:1px solid transparent; border-radius:50%; }
+.moon { width:3px; height:3px; background:#ccc; border-radius:50%; position:absolute; top:0; left:50%; transform:translate(-50%,-50%); }
+.mars-orbit { width:230px; height:230px; animation-duration:30s; }
+.mars { width:7px; height:7px; background:#c1440e; }
+.jupiter-orbit { width:310px; height:310px; animation-duration:95s; }
+.jupiter { width:15px; height:15px; background:linear-gradient(to bottom,#c88b3a,#e8c27a,#c88b3a,#8b4513); }
+.saturn-orbit { width:390px; height:390px; animation-duration:235s; }
+.saturn { width:12px; height:12px; background:#e4d191; }
+.ring { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-20deg); width:24px; height:8px; border:2px solid rgba(230,210,130,0.6); border-radius:50%; }
+.uranus-orbit { width:480px; height:480px; animation-duration:840s; }
+.uranus { width:10px; height:10px; background:#7de8e8; }
+.neptune-orbit { width:570px; height:570px; animation-duration:1645s; }
+.neptune { width:10px; height:10px; background:#5b7fde; }
+@keyframes orbit-rotate { from { transform: translate(-50%,-50%) rotate(0deg); } to { transform: translate(-50%,-50%) rotate(360deg); } }
 
-/* Mercury */
-.mercury-orbit { width: 160px; height: 160px; animation-duration: 4.1s; }
-.mercury { width: 8px; height: 8px; background: #919191; }
-
-/* Venus */
-.venus-orbit { width: 220px; height: 220px; animation-duration: 10.5s; }
-.venus { width: 14px; height: 14px; background: #e3bb76; }
-
-/* Earth & Moon */
-.earth-orbit { width: 300px; height: 300px; animation-duration: 17s; }
-.earth { width: 16px; height: 16px; background: #2271b3; box-shadow: 0 0 10px rgba(34, 113, 179, 0.5); }
-.moon-orbit { position: absolute; width: 30px; height: 30px; animation: rotateOrbit 2s linear infinite; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-.moon { position: absolute; top: -5px; left: 50%; width: 4px; height: 4px; background: #ddd; border-radius: 50%; transform: translateX(-50%); }
-
-/* Mars */
-.mars-orbit { width: 380px; height: 380px; animation-duration: 32s; }
-.mars { width: 11px; height: 11px; background: #e27b58; }
-
-/* Jupiter */
-.jupiter-orbit { width: 550px; height: 550px; animation-duration: 202s; }
-.jupiter { width: 40px; height: 40px; background: #d39c7e; }
-
-/* Saturn & Ring */
-.saturn-orbit { width: 700px; height: 700px; animation-duration: 501s; }
-.saturn { width: 32px; height: 32px; background: #f4d0a4; transform: translate(-50%, -50%) rotate(20deg); }
-.saturn .ring {
-    position: absolute; top: 50%; left: 50%;
-    width: 60px; height: 15px;
-    border: 3px solid rgba(211, 180, 130, 0.6);
-    border-radius: 50%;
-    transform: translate(-50%, -50%) rotate(-20deg);
-}
-
-/* Uranus */
-.uranus-orbit { width: 850px; height: 850px; animation-duration: 1428s; }
-.uranus { width: 26px; height: 26px; background: #a5dadd; }
-
-/* Neptune */
-.neptune-orbit { width: 1000px; height: 1000px; animation-duration: 2796s; }
-.neptune { width: 24px; height: 24px; background: #4b70dd; }
-
-/* 4. Chat UI Layers (Floating) */
-#chat-box {
-    position: relative; z-index: 100;
-    width: 80%; max-width: 900px;
-    height: 70vh; margin-top: 5vh;
-    overflow-y: auto;
-    display: flex; flex-direction: column; gap: 20px;
-    padding: 30px;
-    scrollbar-width: none;
-}
-
-.bot-message, .user-message {
-    max-width: 75%; padding: 18px 25px; border-radius: 25px;
-    backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.08);
-    animation: fadeInSpace 0.6s ease-out;
-    line-height: 1.6;
-}
-
-.bot-message { 
-    align-self: flex-start; 
-    background: rgba(0, 210, 255, 0.08); 
-    color: #a0f0ff; 
-    border-color: rgba(0, 210, 255, 0.2); 
-    box-shadow: 0 5px 20px rgba(0, 210, 255, 0.1);
-    white-space: pre-line; /* This forces the browser to show the new lines */
-    display: block;
-    line-height: 1.8;      /* Adds nice vertical space between points */
-    margin-bottom: 15px;
-    .bot-message {
-    white-space: pre-wrap; /* Preserves the line breaks from Gemini */
-    overflow: hidden;
-}
-}
-
-.user-message { 
-    align-self: flex-end; 
-    background: rgba(111, 177, 252, 0.1); 
-    color: white; 
-    border-color: rgba(111, 177, 252, 0.3); 
-    box-shadow: 0 5px 20px rgba(111, 177, 252, 0.15);
-}
-
-/* Bottom Transmit Area */
-.transmit-area {
-    position: fixed; bottom: 40px; z-index: 200;
-    width: 90%; max-width: 700px;
-    display: flex; gap: 15px;
-    background: rgba(10, 15, 30, 0.6);
-    padding: 12px; border-radius: 100px;
-    border: 1px solid rgba(0, 210, 255, 0.2);
-    backdrop-filter: blur(20px);
-    box-shadow: 0 0 30px rgba(0, 210, 255, 0.15);
-}
-
-input {
-    flex: 1; background: transparent; border: none;
-    color: white; padding: 12px 25px; outline: none; font-size: 16px;
-    letter-spacing: 0.5px;
-}
-
-button {
-    background: linear-gradient(135deg, #0052d4, #4364f7);
-    color: white; border: none;
-    padding: 12px 35px; border-radius: 100px;
-    cursor: pointer; font-weight: bold;
-    letter-spacing: 1px; transition: 0.3s ease;
-}
-
-button:hover { 
-    background: linear-gradient(135deg, #4364f7, #00d2ff); 
-    box-shadow: 0 0 20px rgba(0, 210, 255, 0.6); 
-    transform: scale(1.03); 
-}
-
-
-/* 5. Animations */
-@keyframes rotateOrbit { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
-@keyframes panStars { from { background-position: 0 0; } to { background-position: 1000px 1000px; } }
-@keyframes galaxyDrift { from { transform: translateX(0); } to { transform: translateX(200px); } }
-@keyframes fadeInSpace { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
-
-.digital-clock {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    text-align: right;
-    background: rgba(0, 210, 255, 0.05);
-    padding: 15px 25px;
-    border-radius: 15px;
-    border: 1px solid rgba(0, 210, 255, 0.2);
-    backdrop-filter: blur(10px);
-    z-index: 1000;
-    font-family: 'Courier New', Courier, monospace;
-    box-shadow: 0 0 20px rgba(0, 210, 255, 0.1);
-}
-
-#clock-time {
-    font-size: 2rem;
-    color: #00d2ff;
-    font-weight: bold;
-    text-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
-    letter-spacing: 2px;
-}
-
-#clock-date {
-    font-size: 0.9rem;
-    color: rgba(160, 240, 255, 0.7);
-    margin-top: 5px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-#ai-status {
-    position: absolute;
-    top: -40px;
-    left: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 12px;
-    letter-spacing: 2px;
-    color: #00d2ff;
-    font-weight: bold;
-    opacity: 0.8;
-}
-
-.pulse-container {
-    display: flex;
-    align-items: flex-end;
-    gap: 3px;
-    height: 15px;
-}
-
-.pulse-bar {
-    width: 3px;
-    height: 100%;
-    background: #00d2ff;
-    border-radius: 2px;
-    /* Animation is paused by default */
-    animation: wave 1s ease-in-out infinite;
-    animation-play-state: paused; 
-}
-
-.pulse-bar:nth-child(2) { animation-delay: 0.2s; }
-.pulse-bar:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes wave {
-    0%, 100% { height: 5px; }
-    50% { height: 15px; box-shadow: 0 0 10px #00d2ff; }
-}
-
-/* Class to trigger the animation via JS */
-.is-typing .pulse-bar {
-    animation-play-state: running;
-}
+/* ─── SIDEBAR ─── */
 #sidebar {
-    position: absolute;
-    left: 20px;
-    top: 100px;
-    width: 200px;
-    background: rgba(0, 10, 20, 0.7);
-    border: 1px solid #00f2ff;
-    border-radius: 10px;
-    padding: 15px;
-    z-index: 100;
-    backdrop-filter: blur(5px);
-    max-height: 60vh;
-    overflow-y: auto;
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 240px; z-index: 100;
+  background: var(--panel-bg);
+  border-right: 1px solid var(--border-glow);
+  display: flex; flex-direction: column;
+  padding: 12px;
+  backdrop-filter: blur(12px);
 }
 
 #new-chat-btn {
-    width: 100%;
-    padding: 10px;
-    background: transparent;
-    border: 1px solid #00f2ff;
-    color: #00f2ff;
-    font-family: 'Courier New', Courier, monospace;
-    cursor: pointer;
-    transition: 0.3s;
-    margin-bottom: 15px;
+  background: linear-gradient(135deg, rgba(0,212,255,0.15), rgba(123,45,255,0.15));
+  border: 1px solid var(--glow-cyan);
+  color: var(--glow-cyan);
+  font-family: var(--font-hud); font-size: 11px; font-weight: 600;
+  padding: 10px 14px; border-radius: 6px;
+  cursor: pointer; letter-spacing: 1px;
+  transition: all 0.2s;
+  margin-bottom: 10px;
+}
+#new-chat-btn:hover { background: rgba(0,212,255,0.25); box-shadow: 0 0 12px rgba(0,212,255,0.4); }
+
+#memory-badge {
+  font-family: var(--font-mono); font-size: 10px; color: var(--glow-green);
+  background: rgba(0,255,136,0.08); border: 1px solid rgba(0,255,136,0.2);
+  border-radius: 4px; padding: 5px 8px; margin-bottom: 10px;
+  text-align: center; letter-spacing: 0.5px;
 }
 
-#new-chat-btn:hover {
-    background: rgba(0, 242, 255, 0.2);
-    box-shadow: 0 0 10px #00f2ff;
+#session-list {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
 }
+#session-list::-webkit-scrollbar { width: 3px; }
+#session-list::-webkit-scrollbar-thumb { background: var(--border-glow); border-radius: 2px; }
 
 .session-item {
-    padding: 8px;
-    margin-top: 5px;
-    border-bottom: 1px solid rgba(0, 242, 255, 0.2);
-    font-size: 12px;
-    color: #aaa;
-    cursor: pointer;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  padding: 9px 10px; border-radius: 6px; cursor: pointer; margin-bottom: 4px;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+}
+.session-item:hover { background: rgba(0,212,255,0.08); border-color: var(--border-glow); }
+.session-item.active { background: rgba(0,212,255,0.12); border-color: var(--glow-cyan); }
+.session-title { font-size: 11px; color: var(--star-white); line-height: 1.3; word-break: break-word; }
+.session-meta { font-size: 9px; color: var(--text-dim); margin-top: 2px; }
+
+/* Feedback Panel */
+#feedback-panel {
+  margin-top: 8px; padding-top: 10px;
+  border-top: 1px solid var(--border-glow);
+}
+.feedback-title {
+  font-family: var(--font-hud); font-size: 9px; color: var(--glow-purple);
+  letter-spacing: 1px; margin-bottom: 7px;
+}
+#feedback-q, #feedback-a {
+  width: 100%; background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;
+  color: var(--star-white); font-family: var(--font-mono); font-size: 10px;
+  padding: 6px 8px; margin-bottom: 5px; outline: none;
+  transition: border 0.2s;
+}
+#feedback-q:focus, #feedback-a:focus { border-color: var(--glow-purple); }
+#feedback-btn {
+  width: 100%; background: rgba(123,45,255,0.2);
+  border: 1px solid var(--glow-purple); color: var(--glow-purple);
+  font-family: var(--font-hud); font-size: 9px; letter-spacing: 1px;
+  padding: 7px; border-radius: 4px; cursor: pointer; transition: all 0.2s;
+}
+#feedback-btn:hover { background: rgba(123,45,255,0.35); }
+
+/* ─── AI STATUS ─── */
+#ai-status {
+  position: absolute; top: 16px; right: 20px; z-index: 100;
+  display: flex; align-items: center; gap: 10px;
+  background: var(--panel-bg); border: 1px solid var(--border-glow);
+  border-radius: 20px; padding: 6px 14px;
+  backdrop-filter: blur(10px);
+}
+#status-text {
+  font-family: var(--font-hud); font-size: 10px; font-weight: 600;
+  color: var(--glow-cyan); letter-spacing: 1.5px;
+}
+.pulse-container { display: flex; gap: 3px; align-items: center; }
+.pulse-bar {
+  width: 3px; height: 14px;
+  background: var(--glow-cyan);
+  border-radius: 2px;
+  animation: pulse-anim 1s ease-in-out infinite;
+}
+.pulse-bar:nth-child(2) { animation-delay: 0.2s; }
+.pulse-bar:nth-child(3) { animation-delay: 0.4s; }
+@keyframes pulse-anim { 0%,100% { transform: scaleY(0.4); opacity: 0.4; } 50% { transform: scaleY(1); opacity: 1; } }
+
+#rag-indicators { display: flex; gap: 4px; }
+.rag-tag {
+  font-family: var(--font-hud); font-size: 8px; letter-spacing: 0.5px;
+  padding: 2px 6px; border-radius: 10px;
+}
+#tag-memory { background: rgba(0,255,136,0.15); border: 1px solid var(--glow-green); color: var(--glow-green); }
+#tag-knowledge { background: rgba(0,212,255,0.15); border: 1px solid var(--glow-cyan); color: var(--glow-cyan); }
+
+/* ─── CHAT BOX ─── */
+#chat-box {
+  position: absolute;
+  left: 260px; right: 20px; top: 60px; bottom: 90px;
+  overflow-y: auto; z-index: 50; padding: 16px 10px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+#chat-box::-webkit-scrollbar { width: 4px; }
+#chat-box::-webkit-scrollbar-thumb { background: var(--border-glow); border-radius: 2px; }
+
+/* Messages */
+.message {
+  max-width: 75%; display: flex; flex-direction: column; gap: 4px;
+}
+.message.user { align-self: flex-end; align-items: flex-end; }
+.message.assistant { align-self: flex-start; align-items: flex-start; }
+
+.msg-content {
+  padding: 11px 15px; border-radius: 14px; line-height: 1.6;
+  font-family: var(--font-mono); font-size: 13px; word-break: break-word;
+}
+.user .msg-content {
+  background: linear-gradient(135deg, rgba(0,212,255,0.18), rgba(0,150,255,0.12));
+  border: 1px solid rgba(0,212,255,0.35);
+  color: #d0efff; border-bottom-right-radius: 4px;
+}
+.assistant .msg-content {
+  background: rgba(10, 22, 40, 0.9);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--star-white); border-bottom-left-radius: 4px;
 }
 
-.session-item:hover {
-    color: #00f2ff;
+.message.appear { animation: msg-appear 0.3s ease forwards; }
+@keyframes msg-appear { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Message badges */
+.msg-badges { display: flex; gap: 5px; margin-top: 3px; }
+.msg-badge {
+  font-family: var(--font-hud); font-size: 8px; letter-spacing: 0.5px;
+  padding: 2px 7px; border-radius: 10px; opacity: 0.8;
+}
+.mem-badge { background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); color: var(--glow-green); }
+.rag-badge { background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.3); color: var(--glow-cyan); }
+
+/* Typing dots */
+.typing-indicator .msg-content { padding: 14px 18px; }
+.dot {
+  display: inline-block; width: 6px; height: 6px;
+  background: var(--glow-cyan); border-radius: 50%; margin: 0 2px;
+  animation: bounce 1.2s ease-in-out infinite;
+}
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,80%,100% { transform: translateY(0); opacity:0.4; } 40% { transform: translateY(-6px); opacity:1; } }
+
+/* Code */
+code {
+  background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.2);
+  border-radius: 3px; padding: 1px 5px;
+  font-family: var(--font-mono); font-size: 12px; color: var(--glow-cyan);
 }
 
-.active-session {
-    border-left: 3px solid #00f2ff;
-    color: #00f2ff;
-    padding-left: 10px;
+/* ─── INPUT AREA ─── */
+.transmit-area {
+  position: absolute; bottom: 20px;
+  left: 260px; right: 20px; z-index: 100;
+  display: flex; gap: 10px;
 }
+#user-input {
+  flex: 1; background: var(--panel-bg);
+  border: 1px solid var(--border-glow); border-radius: 10px;
+  color: var(--star-white); font-family: var(--font-mono); font-size: 13px;
+  padding: 12px 16px; outline: none;
+  backdrop-filter: blur(10px); transition: border 0.2s;
+}
+#user-input:focus { border-color: var(--glow-cyan); box-shadow: 0 0 12px rgba(0,212,255,0.2); }
+#user-input::placeholder { color: var(--text-dim); }
+
+#send-btn {
+  background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(0,150,255,0.25));
+  border: 1px solid var(--glow-cyan); color: var(--glow-cyan);
+  font-family: var(--font-hud); font-size: 11px; font-weight: 700;
+  letter-spacing: 1.5px; padding: 12px 22px; border-radius: 10px;
+  cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+#send-btn:hover { background: rgba(0,212,255,0.35); box-shadow: 0 0 16px rgba(0,212,255,0.4); }
+#send-btn:active { transform: scale(0.97); }
+
+/* ─── CLOCK ─── */
+.digital-clock {
+  position: absolute; bottom: 150px; left: 20px; z-index: 100;
+  text-align: left; width: 220px;
+}
+#clock-time {
+  font-family: var(--font-hud); font-size: 22px; font-weight: 900;
+  color: var(--glow-cyan); letter-spacing: 3px;
+  text-shadow: 0 0 12px rgba(0,212,255,0.6);
+}
+#clock-date {
+  font-family: var(--font-mono); font-size: 9px; color: var(--text-dim);
+  letter-spacing: 1px; margin-top: 2px;
+}
+
+/* ─── SCROLLBAR GLOBAL ─── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-glow); border-radius: 2px; }
